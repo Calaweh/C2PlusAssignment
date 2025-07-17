@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Build and Run with g++",
+            "type": "cppdbg",
+            "request": "launch",
+            // This points to the .exe file to run. It matches the output of your build task.
+            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            // Use VS Code's integrated terminal for output
+            "console": "integratedTerminal", 
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe", // Make sure this path is correct for your system
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            // This is the magic link! It runs your build task before trying to run the program.
+            "preLaunchTask": "C/C++: Build Project (g++)"
+        }
+    ]
+}
