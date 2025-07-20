@@ -30,7 +30,7 @@ struct CustomerManager : public EntitiesManager<App::Customer>
     std::shared_ptr<App::Customer> accountVerification(const std::string &EMAIL_OR_ID,
                                                        const std::string &PWD) const
     {
-        std::cout << "5" << std::endl;/////////////////////
+        std::cout << "5" << std::endl; /////////////////////
         return ::accountVerification(this->entities, EMAIL_OR_ID, PWD);
     }
 };

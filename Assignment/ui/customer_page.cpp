@@ -6,5 +6,5 @@ CustomerPage::CustomerPage(App::Customer& customer)
 
 void CustomerPage::display(ScreenController &screenController)
 {
-    std::cout << "Hello" << std::endl;
+    std::cout << "HelloCustomer" << std::endl;
 }

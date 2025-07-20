@@ -17,7 +17,6 @@ LoginPage::LoginPage(std::string emailOrId, std::string password)
 
 void LoginPage::display(ScreenController &screenController)
 {
-    bool isError = false;
     std::string errorMessage;
     std::string contentDisplayed = std::string("1) Customer\n2) Vendor\n3) Staff\n0) Exit");
     std::string input;
@@ -28,10 +27,10 @@ void LoginPage::display(ScreenController &screenController)
 
         std::cout << contentDisplayed << std::endl;
 
-        if (isError)
+        if (!errorMessage.empty())
         {
             std::cout << errorMessage << std::endl;
-            isError = !isError;
+            errorMessage.clear();
         }
 
         if (!getline(std::cin, input))
@@ -39,9 +38,8 @@ void LoginPage::display(ScreenController &screenController)
         }
 
         type = stoa<int>(input);
-        if (type == -1)
+        if (type == -1 || (type < 0 || type > 3))
         {
-            isError = true;
             errorMessage = "Invalid input. Please enter a number.";
             continue;
         }
@@ -62,6 +60,7 @@ void LoginPage::display(ScreenController &screenController)
             if (auto customer = std::get_if<std::shared_ptr<App::Customer>>(&identity))
             {
                 if (!*customer) 
+                    break;
                 screenController.navigateToCustomerPage(**customer);
             }
             return;

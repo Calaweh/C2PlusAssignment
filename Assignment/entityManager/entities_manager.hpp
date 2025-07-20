@@ -15,7 +15,11 @@ public:
     std::string collectionName;
 
     EntitiesManager(const std::string &collectionName, const std::string &dbPath = DATABASE_FILE_PATH)
-        : db(dbPath), collectionName(collectionName) {}
+        : db(dbPath), collectionName(collectionName)
+    {
+        loadEntities();
+        restrictedEntities = entities;
+    }
 
     ~EntitiesManager() = default;
 

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include "../universalFunction/globalFile.hpp"
+#include "to_from_json.hpp"
 
 using json = nlohmann::json;
 
@@ -79,8 +80,7 @@ public:
         {
             for (const auto &item : db[collectionName])
             {
-                T entity;
-                from_json(item, entity);
+                T entity = item.get<T>();
                 entities.push_back(entity);
             }
         }
