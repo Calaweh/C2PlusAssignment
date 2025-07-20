@@ -6,3 +6,5 @@
 .vscode/
 build/
 bin/
+
+**/*.exe
