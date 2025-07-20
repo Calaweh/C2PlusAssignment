@@ -1,5 +1,5 @@
 #include <iostream>
-#include <nlohmann/json.hpp>
+#include "../json/single_include/nlohmann/json.hpp"
 #include <vector>
 #include <memory>
 #include <fstream>
@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cmath>
+#include <type_traits>
 
 #include "globalFile.hpp"
 #include "helperFunctions.hpp"
@@ -113,3 +114,22 @@ std::vector<std::string> splitStringBySpace(const std::string &STR, const int MA
 
     return result;
 }
+
+template <typename T>
+T stoa(const std::string& str) {
+    try {
+        if constexpr (std::is_same_v<T, int>) {
+            return std::stoi(str);
+        }
+        else if constexpr (std::is_same_v<T, double>) {
+            return std::stod(str);
+        }
+        throw std::invalid_argument("Unsupported type");
+    }
+    catch (...) {
+        throw std::invalid_argument("Invalid numeric conversion");
+    }
+}
+
+template int stoa<int>(const std::string&);
+template double stoa<double>(const std::string&);

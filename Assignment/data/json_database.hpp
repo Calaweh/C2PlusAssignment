@@ -1,8 +1,8 @@
 #pragma once
-#include <nlohmann/json.hpp>
+#include "../json/single_include/nlohmann/json.hpp"
 #include <fstream>
 #include <iomanip>
-#include "globalFile.hpp"
+#include "../universalFunction/globalFile.hpp"
 
 using json = nlohmann::json;
 
@@ -57,7 +57,7 @@ private:
 
 public:
     // Constructor
-    JsonDatabase(const std::string &path) : dbPath(path) {}
+    JsonDatabase(const std::string &PATH = DATABASE_FILE_PATH) : dbPath(PATH) {}
 
     template <typename T>
     inline void createEntity(const std::string &collectionName, const T &ENTITY)
@@ -108,14 +108,14 @@ public:
     }
 
     template <typename T>
-    inline void deleteEntity(const std::string &collectionName, const std::string &ID)
+    inline void deleteEntity(const std::string &collectionName, const std::string &Id)
     {
         json db = loadDatabase();
         auto &collection = db[collectionName];
 
         for (auto it = collection.begin(); it != collection.end();)
         {
-            if ((*it)[PRIMARY_KEY_ID] == ID)
+            if ((*it)[PRIMARY_KEY_ID] == Id)
                 it = collection.erase(it);
             else
                 ++it;

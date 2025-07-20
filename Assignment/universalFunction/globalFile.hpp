@@ -20,11 +20,12 @@
 #define REPORT_FILE "report.json"
 
 #define MAX_PRIMARY_KEY_DIGITS 10
-#define PRIMARY_KEY_ID "ID"
+#define PRIMARY_KEY_ID "Id"
 
 //UI components
-#define separatorLine  "----------------------------------------"
-#define separatorLine2 "========================================"
+#define SEPARATOR_LINE  "----------------------------------------"
+#define SEPARATOR_LINE_2 "========================================"
+#define PRESS_HINT "Press any key to continue..."
 
 //Class names
 #define EVENTS "Events"

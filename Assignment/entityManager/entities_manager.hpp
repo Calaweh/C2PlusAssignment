@@ -1,20 +1,20 @@
 #pragma once
-#include "data\json_database.hpp"
-#include "entity\entities.hpp"
-#include "globalFile.hpp"
+#include "..\data\json_database.hpp"
+#include "..\entity\entities.hpp"
+#include "..\universalFunction\globalFile.hpp"
 #include <vector>
 #include <unordered_set>
 
 template <typename T>
-class EntitiesManager
+struct EntitiesManager
 {
 public:
     JsonDatabase db;
-    std::unordered_set<std::weak_ptr<T>> entities;
-    std::unordered_set<std::weak_ptr<T>> restrictedEntities;
+    std::unordered_set<std::shared_ptr<T>> entities;
+    std::unordered_set<std::shared_ptr<T>> restrictedEntities;
     std::string collectionName;
 
-    EntitiesManager(const std::string &dbPath = DATABASE_FILE_PATH, const std::string &collectionName)
+    EntitiesManager(const std::string &collectionName, const std::string &dbPath = DATABASE_FILE_PATH)
         : db(dbPath), collectionName(collectionName) {}
 
     ~EntitiesManager() = default;
@@ -23,7 +23,7 @@ public:
     {
         for (const auto &existingEntity : this->entities)
             if (auto lockedEntity = existingEntity.lock())
-                if (lockedEntity->ID == entity.ID)
+                if (lockedEntity->Id == entity.Id)
                 {
                     updateEntity(entity);
                     return;
@@ -33,13 +33,13 @@ public:
 
     inline void deleteEntity(T &entity)
     {
-        db.deleteEntity(collectionName, entity.ID);
+        db.deleteEntity(collectionName, entity.Id);
         this->entities.erase(
             std::remove_if(this->entities.begin(), this->entities.end(),
                            [&entity](const std::weak_ptr<T> &e)
                            {
                                auto locked = e.lock();
-                               return locked && locked->ID == entity.ID;
+                               return locked && locked->Id == entity.Id;
                            }),
             this->entities.end());
     }
@@ -59,7 +59,7 @@ public:
         auto it = std::find_if(this->entities.begin(), this->entities.end(),
                                [&entity](const std::weak_ptr<T> &e)
                                {
-                                   return e.lock()->ID == entity.ID;
+                                   return e.lock()->Id == entity.Id;
                                });
         if (it != this->entities.end())
             *it = std::make_shared<T>(entity);

@@ -1,0 +1,66 @@
+#pragma once
+#include <iostream>
+#include <string>
+#include <memory>
+#include <functional>
+#include <iostream>
+
+using HandlerResult = std::pair<std::string, std::string>; 
+using InputHandler = std::function<HandlerResult(const std::string&)>;
+
+class InteractivePrompt {
+public:
+    std::string run_one_cycle(
+        const std::string& contentToDisplay,
+        const std::string& errorMessage = "", 
+        const std::string& promptSymbol = "> " 
+    ) {
+            system("cls");
+
+        std::cout << contentToDisplay << std::endl;
+
+        if (!errorMessage.empty()) {
+            std::cout << "\n[!] " << errorMessage << std::endl;
+        }
+
+        std::cout << "\n" << promptSymbol;
+        
+        std::string userInput;
+        if (!getline(std::cin, userInput)) 
+            return "quit"; 
+        
+        return userInput;
+    }
+};
+
+class Application {
+private:
+    std::unique_ptr<InteractivePrompt> prompt;
+    std::string currentState;
+    std::string errorMessage;
+
+public:
+    Application() 
+        : prompt(std::make_unique<InteractivePrompt>()), 
+          currentState("main_menu"),
+          errorMessage("")
+    {}
+
+    void run() {
+        while (currentState != "quit_app") {
+            std::string content, promptSymbol;
+            InputHandler handler;
+
+            std::string userInput = prompt->run_one_cycle(content, errorMessage, promptSymbol);
+
+            if (handler) {
+                auto [nextState, newError] = handler(userInput);
+                currentState = nextState;
+                errorMessage = newError;
+            } else {
+                errorMessage = "Error: No handler for current state.";
+            }
+        }
+        std::cout << "Application has shut down." << std::endl;
+    }
+};
