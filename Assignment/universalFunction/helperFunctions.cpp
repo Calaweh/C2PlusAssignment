@@ -15,6 +15,32 @@
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
+bool IOSubManager::getIsValid() { return isValid; }
+void IOSubManager::setInvalid()
+{
+    this->isValid = false;
+    this->selection = 0;
+}
+
+int IOSubManager::getSelection() { return selection; }
+void IOSubManager::setSelection(int selection)
+{
+    this->selection = selection;
+    this->isValid = true;
+}
+
+void IOSubManager::gotError(std::string errorMessage)
+{
+    this->errorMessage = errorMessage;
+    setInvalid();
+}
+void IOSubManager::setValid() { 
+    this->errorMessage.clear();
+    this->isValid = true;
+}
+
+
+
 std::string getPrimaryKey(const std::string &className)
 {
     int primaryKeyNum = 1;
@@ -115,21 +141,57 @@ std::vector<std::string> splitStringBySpace(const std::string &STR, const int MA
     return result;
 }
 
-template <typename T>
-T stoa(const std::string& str) {
-    try {
-        if constexpr (std::is_same_v<T, int>) {
-            return std::stoi(str);
+void stoiWithLimit(IOSubManager &iOSubManager, const int &MIN_NUM, const int &MAX_NUM)
+{
+    stoa<int>(iOSubManager);
+    if (iOSubManager.getIsValid())
+    {
+        int value = iOSubManager.getSelection();
+        if (value < MIN_NUM || value > MAX_NUM) {
+            iOSubManager.gotError("Invalid Selection. Please try again.");
         }
-        else if constexpr (std::is_same_v<T, double>) {
-            return std::stod(str);
-        }
-        throw std::invalid_argument("Unsupported type");
     }
-    catch (...) {
-        throw std::invalid_argument("Invalid numeric conversion");
-    }
+    return;
 }
 
-template int stoa<int>(const std::string&);
-template double stoa<double>(const std::string&);
+template <typename T>
+void stoa(IOSubManager &IOSubManager)
+{
+    size_t pos;
+    try
+    {
+        if constexpr (std::is_same_v<T, int>)
+        {
+            int value = std::stoi(IOSubManager.input, &pos);
+            if (pos != IOSubManager.input.length())
+            {
+                IOSubManager.gotError("Invalid numeric conversion");
+                return;
+            }
+            else
+            {
+                IOSubManager.setSelection(value);
+                return;
+            }
+        }
+        // else if constexpr (std::is_same_v<T, double>)
+        // {
+        //     double value = std::stod(IOSubManager.input, &pos);
+        //     if (pos != IOSubManager.input.length())
+        //     {
+        //         IOSubManager.setInvalid();
+        //         return;
+        //     }
+        //     else
+        //     {
+        //         IOSubManager.setSelection(value);
+        //         return;
+        //     }
+        // }
+        IOSubManager.gotError("Unsupported type");
+    }
+    catch (...)
+    {
+        IOSubManager.gotError("Invalid numeric conversion");
+    }
+}

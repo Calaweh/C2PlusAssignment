@@ -1,5 +1,6 @@
 #pragma once
 #include "../entity/entities.hpp"
+#include "../universalFunction/helperFunctions.hpp"
 #include "entities_manager.hpp"
 #include <iostream>
 #include <variant>
@@ -9,7 +10,7 @@ std::shared_ptr<T> accountVerification(const std::unordered_set<std::shared_ptr<
                                        const std::string &EMAIL_OR_ID,
                                        const std::string &PWD)
 {
-    std::cout << "4" << std::endl; /////////////////////
+    // std::cout << "4" << std::endl; /////////////////////
     for (const auto &entity : ENTITIES)
     {
         if (!entity)
@@ -30,7 +31,7 @@ struct CustomerManager : public EntitiesManager<App::Customer>
     std::shared_ptr<App::Customer> accountVerification(const std::string &EMAIL_OR_ID,
                                                        const std::string &PWD) const
     {
-        std::cout << "5" << std::endl; /////////////////////
+        // std::cout << "5" << std::endl; /////////////////////
         return ::accountVerification(this->entities, EMAIL_OR_ID, PWD);
     }
 };
@@ -81,7 +82,7 @@ struct IdentityManager : public EntitiesManager<App::Identity>
         switch (type)
         {
         case 1:
-            std::cout << "1" << std::endl; /////////////////////
+            // std::cout << "1" << std::endl; /////////////////////
             return customerManager.accountVerification(EMAIL_OR_ID, PWD);
             break;
         case 2:

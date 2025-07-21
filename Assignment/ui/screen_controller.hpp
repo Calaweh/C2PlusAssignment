@@ -2,28 +2,30 @@
 #include "page.hpp"
 #include "pages.hpp"
 #include "../entityManager/master_manager.hpp"
+#include "../universalFunction/helperFunctions.hpp"
 #include <memory>
 
-class ScreenController
+struct ScreenController
 {
 private:
     std::unique_ptr<Page> currentPage;
-    bool isRunning = true;
     MasterManager &masterManager;
+    IOSubManager &iOSubManager;
 
 public:
-    ScreenController(MasterManager &masterManager);
+    ScreenController(MasterManager &masterManager, IOSubManager &iOSubManager);
 
     void navigateToLogin();
     void navigateToCustomerPage(App::Customer &customer);
     void navigateToVendorPage(App::Vendor &vendor);
     void navigateToStaffPage(App::Staff &staff);
 
-    void exit() { isRunning = false; }
+    void exit();
 
     void clearScreen();
 
     const MasterManager& getMasterManager() const { return masterManager; }
+    IOSubManager& getIOSubManager() const { return iOSubManager; }
 };
 
 // {
