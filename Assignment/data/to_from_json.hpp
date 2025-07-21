@@ -1,4 +1,4 @@
-#include "../entity/entities.hpp" 
+#include "../entity/entities.hpp"
 #include "../json/single_include/nlohmann/json.hpp"
 #include <iomanip>
 #include <sstream>
@@ -331,8 +331,7 @@ namespace nlohmann
                 {"endDateTime", mc.endDateTime},
                 {"isPercentageBased", mc.isPercentageBased},
                 {"discountValue", mc.discountValue},
-                {"status", mc.status} 
-            };
+                {"status", mc.status}};
         }
 
         static App::MarketingCampaign from_json(const json &j)
@@ -404,7 +403,7 @@ namespace nlohmann
         {
             j = {
                 {"Id", d.Id},
-                {"address", d.address}, 
+                {"address", d.address},
                 {"status", d.status},
                 {"scheduledDateTime", d.scheduledDateTime},
                 {"actualDateTime", d.actualDateTime},
@@ -416,7 +415,7 @@ namespace nlohmann
         {
             return App::Delivery(
                 j.at("Id").get<std::string>(),
-                j.at("address").get<App::Address>(), 
+                j.at("address").get<App::Address>(),
                 j.at("status").get<App::Delivery::Status>(),
                 j.at("scheduledDateTime").get<std::chrono::system_clock::time_point>(),
                 j.at("actualDateTime").get<std::chrono::system_clock::time_point>(),

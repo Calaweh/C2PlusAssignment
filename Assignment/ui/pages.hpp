@@ -1,8 +1,8 @@
 #pragma once
-#include "page.hpp"
 #include <string>
+#include "page.hpp"
+#include "../universalFunction/helperFunctions.hpp"
 
-// Forward declarations
 namespace App {
     class Customer;
     class Vendor;
@@ -10,40 +10,51 @@ namespace App {
 }
 
 class LoginPage : public Page {
+
 public:
     explicit LoginPage() = default;
     explicit LoginPage(std::string emailOrId, std::string password);
     void display(ScreenController& screenController) override; 
-    void accountPrompt(std::string &errorMessage);
+    void accountPrompt(IOSubManager &iOSubManager);
+    void switchPage(ScreenController& screenController, IOSubManager &IOSubManager, bool &isBack);
+    void SignUpPage();
+    void ForgotPasswordPage();
     
 private:
     std::string emailOrId;
     std::string password;
+    int accountType; //1 for Customer, 2 for Vendor, 3 for Staff
 };
+
+
 
 class CustomerPage : public Page {
 public:
     explicit CustomerPage(App::Customer& customer);
-    void display(ScreenController& screenController) override;  // Proper override
+    void display(ScreenController& screenController) override;  
     
 private:
-    App::Customer& customer;  // Using reference as per your design
+    App::Customer& customer;  
 };
+
+
 
 class VendorPage : public Page {
 public:
     explicit VendorPage(App::Vendor& vendor);
-    void display(ScreenController& screenController) override;  // Proper override
+    void display(ScreenController& screenController) override;  
     
 private:
-    App::Vendor& vendor;  // Using reference as per your design
+    App::Vendor& vendor;  
 };
+
+
 
 class StaffPage : public Page {
 public:
     explicit StaffPage(App::Staff& staff);
-    void display(ScreenController& screenController) override;  // Proper override
+    void display(ScreenController& screenController) override; 
     
 private:
-    App::Staff& staff;  // Using reference as per your design
+    App::Staff& staff; 
 };

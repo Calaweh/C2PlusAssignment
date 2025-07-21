@@ -54,6 +54,8 @@ private:
         {
             throw std::runtime_error("Could not open database file for writing.");
         }
+
+        dbFile << DATA.dump(4);
     }
 
 public:
@@ -97,7 +99,7 @@ public:
 
         for (auto &item : db[collectionName])
         {
-            if (item[PRIMARY_KEY_ID] == entityJson[PRIMARY_KEY_ID]) // Assuming 'id' is the primary key
+            if (item[PRIMARY_KEY_ID] == entityJson[PRIMARY_KEY_ID]) 
             {
                 item = entityJson;
                 break;

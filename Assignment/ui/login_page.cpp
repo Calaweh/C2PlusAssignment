@@ -1,9 +1,9 @@
+#include <format>
+#include <iostream>
 #include "pages.hpp"
 #include "helperFunctions.hpp"
 #include "screen_controller.hpp"
-#include <format>
 #include "json_database.hpp"
-#include <iostream>
 
 using IdentityReturn = std::variant<
     std::monostate,
@@ -17,95 +17,145 @@ LoginPage::LoginPage(std::string emailOrId, std::string password)
 
 void LoginPage::display(ScreenController &screenController)
 {
-    std::string errorMessage;
     std::string contentDisplayed = std::string("1) Customer\n2) Vendor\n3) Staff\n0) Exit");
     std::string input;
-    int type = 0;
+    bool isBack = false;
 
-    while (true)
+    do
     {
-
-        std::cout << contentDisplayed << std::endl;
-
-        if (!errorMessage.empty())
+        isBack = false;
+        while (true)
         {
-            std::cout << errorMessage << std::endl;
-            errorMessage.clear();
-        }
 
-        if (!getline(std::cin, input))
-        {
-        }
+            std::cout << contentDisplayed << std::endl;
 
-        type = stoa<int>(input);
-        if (type == -1 || (type < 0 || type > 3))
-        {
-            errorMessage = "Invalid input. Please enter a number.";
-            continue;
-        }
-        break;
-    }
-
-    while (true)
-    {
-        accountPrompt(errorMessage);
-
-        auto &identityManager = screenController.getMasterManager().getIdentityManager();
-
-        auto identity = identityManager.accountVerification(this->emailOrId, this->password, type);
-
-        switch (type)
-        {
-        case 1:
-            if (auto customer = std::get_if<std::shared_ptr<App::Customer>>(&identity))
+            if (!screenController.getIOSubManager().getIsValid())
             {
-                if (!*customer) 
-                    break;
-                screenController.navigateToCustomerPage(**customer);
+                std::cout << screenController.getIOSubManager().errorMessage << std::endl;
+                screenController.getIOSubManager().setValid();
             }
-            return;
-        case 2:
-            if (auto vendor = std::get_if<std::shared_ptr<App::Vendor>>(&identity))
+
+            if (!getline(std::cin, screenController.getIOSubManager().input))
             {
-                if (!*vendor)
-                    break;
-                screenController.navigateToVendorPage(**vendor);
             }
-            return;
-        case 3:
-            if (auto staff = std::get_if<std::shared_ptr<App::Staff>>(&identity))
+
+            stoa<int>(screenController.getIOSubManager());
+
+            stoiWithLimit(screenController.getIOSubManager(), 0, 3);
+
+            if (!screenController.getIOSubManager().getIsValid())
             {
-                if (!*staff) 
-                    break;
-                screenController.navigateToStaffPage(**staff);
+                continue;
             }
-            return;
-        default:
-            errorMessage = "Account doesn't exist or invalid password. Please try again.";
-            continue;
+            this->accountType = screenController.getIOSubManager().getSelection();
+            break;
         }
-        errorMessage = "Account doesn't exist or invalid password. Please try again.";
-        continue;
-    }
+
+        switchPage(screenController, screenController.getIOSubManager(), isBack);
+
+    } while (isBack);
 }
 
-void LoginPage::accountPrompt(std::string &errorMessage)
+void LoginPage::switchPage(ScreenController &screenController, IOSubManager &IOSubManager, bool &isBack)
 {
-    std::string emailOrId, pwd;
+    accountPrompt(IOSubManager);
+
+    if (IOSubManager.getSelection() == 0 && IOSubManager.getIsValid())
+    {
+        isBack = true;
+        return;
+    }
+
+    switch (IOSubManager.getSelection())
+    {
+    case -1:
+        SignUpPage();
+    
+    case -2:
+        ForgotPasswordPage();
+   
+    }
+
+    auto &identityManager = screenController.getMasterManager().getIdentityManager();
+
+    auto identity = identityManager.accountVerification(this->emailOrId, this->password, this->accountType);
+
+    switch (this->accountType)
+    {
+    case 1:
+        if (auto customer = std::get_if<std::shared_ptr<App::Customer>>(&identity))
+        {
+            if (!*customer)
+                break;
+            screenController.navigateToCustomerPage(**customer);
+        }
+        return;
+    case 2:
+        if (auto vendor = std::get_if<std::shared_ptr<App::Vendor>>(&identity))
+        {
+            if (!*vendor)
+                break;
+            screenController.navigateToVendorPage(**vendor);
+        }
+        return;
+    case 3:
+        if (auto staff = std::get_if<std::shared_ptr<App::Staff>>(&identity))
+        {
+            if (!*staff)
+                break;
+            screenController.navigateToStaffPage(**staff);
+        }
+        return;
+    default:
+        IOSubManager.gotError("Account doesn't exist or invalid password. Please try again.");
+        isBack = true;
+        
+    }
+    IOSubManager.gotError("Account doesn't exist or invalid password. Please try again.");
+    isBack = true;
+   
+}
+
+void LoginPage::accountPrompt(IOSubManager &iOSubManager)
+{
+    std::string input;
+
     std::string contentDisplayed = std::format(
-        " *Email or ID: {0}\n *Password: {1}\n0) Exit", this->emailOrId, this->password);
+        " *Email or ID: {0}\n *Password: {1}\n 0) Back \n-1) Sign Up \n-2) Forgot Password", this->emailOrId, this->password);
 
     std::cout << contentDisplayed << std::endl;
 
-    if (!errorMessage.empty())
+    if (!iOSubManager.errorMessage.empty())
     {
-        std::cout << errorMessage << std::endl;
-        errorMessage.clear();
+        std::cout << iOSubManager.errorMessage << std::endl;
+        iOSubManager.setValid();
     }
 
     std::cout << "Please enter your Email or ID: ";
-    getline(std::cin, this->emailOrId);
+    getline(std::cin, iOSubManager.input);
+
+    stoiWithLimit(iOSubManager, -2, 0);
+    if (iOSubManager.getIsValid())
+        return;
+
+    this->emailOrId = input;
 
     std::cout << "Please enter your Password: ";
-    getline(std::cin, this->password);
+    getline(std::cin, iOSubManager.input);
+
+    stoiWithLimit(iOSubManager, -2, 0);
+    if (iOSubManager.getIsValid())
+        return;
+
+    this->password = input;
+
+    return;
+}
+
+void LoginPage::SignUpPage()
+{
+}
+
+void LoginPage::ForgotPasswordPage()
+{
 }

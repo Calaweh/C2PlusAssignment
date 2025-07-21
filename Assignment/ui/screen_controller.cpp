@@ -1,12 +1,12 @@
-#include "pages.hpp"
-#include <memory>
 #include "screen_controller.hpp"
 
-ScreenController::ScreenController(MasterManager &masterManager) : masterManager(masterManager) { navigateToLogin(); }
+ScreenController::ScreenController(MasterManager &masterManager, IOSubManager &iOSubManager)
+    : masterManager(masterManager),
+      iOSubManager(iOSubManager) {}
 
 void ScreenController::navigateToLogin()
 {
-    currentPage = std::make_unique<LoginPage>("", ""); //empty password and email or ID
+    currentPage = std::make_unique<LoginPage>("", ""); // empty password and email or ID
     currentPage->display(*this);
 }
 
