@@ -27,11 +27,11 @@ namespace App
                                                     {Stall::Status::UnderMaintenance, "UnderMaintenance"},
                                                 })
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(Item::Transaction::Status, {
-                                                                {Item::Transaction::Status::Pending, "Pending"},
-                                                                {Item::Transaction::Status::Completed, "Completed"},
-                                                                {Item::Transaction::Status::Failed, "Failed"},
-                                                            })
+    // NLOHMANN_JSON_SERIALIZE_ENUM(Item::Transaction::Status, {
+    //                                                             {Item::Transaction::Status::Pending, "Pending"},
+    //                                                             {Item::Transaction::Status::Completed, "Completed"},
+    //                                                             {Item::Transaction::Status::Failed, "Failed"},
+    //                                                         })
 
     NLOHMANN_JSON_SERIALIZE_ENUM(Item::Status, {
                                                    {Item::Status::Available, "Available"},
@@ -66,28 +66,28 @@ namespace App
                                                                 {MarketingCampaign::Status::Expired, "Expired"},
                                                             })
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(OrderList::Status, {
-                                                        {OrderList::Status::Pending, "Pending"},
-                                                        {OrderList::Status::Confirmed, "Confirmed"},
-                                                        {OrderList::Status::Shipped, "Shipped"},
-                                                        {OrderList::Status::Delivered, "Delivered"},
-                                                        {OrderList::Status::Cancelled, "Cancelled"},
-                                                    })
+    // NLOHMANN_JSON_SERIALIZE_ENUM(OrderList::Status, {
+    //                                                     {OrderList::Status::Pending, "Pending"},
+    //                                                     {OrderList::Status::Confirmed, "Confirmed"},
+    //                                                     {OrderList::Status::Shipped, "Shipped"},
+    //                                                     {OrderList::Status::Delivered, "Delivered"},
+    //                                                     {OrderList::Status::Cancelled, "Cancelled"},
+    //                                                 })
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(Order::Status, {
-                                                    {Order::Status::Pending, "Pending"},
-                                                    {Order::Status::Confirmed, "Confirmed"},
-                                                    {Order::Status::Shipped, "Shipped"},
-                                                    {Order::Status::Delivered, "Delivered"},
-                                                    {Order::Status::Cancelled, "Cancelled"},
-                                                })
+    // NLOHMANN_JSON_SERIALIZE_ENUM(Order::Status, {
+    //                                                 {Order::Status::Pending, "Pending"},
+    //                                                 {Order::Status::Confirmed, "Confirmed"},
+    //                                                 {Order::Status::Shipped, "Shipped"},
+    //                                                 {Order::Status::Delivered, "Delivered"},
+    //                                                 {Order::Status::Cancelled, "Cancelled"},
+    //                                             })
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(Delivery::Status, {
-                                                       {Delivery::Status::Pending, "Pending"},
-                                                       {Delivery::Status::InTransit, "InTransit"},
-                                                       {Delivery::Status::Delivered, "Delivered"},
-                                                       {Delivery::Status::Cancelled, "Cancelled"},
-                                                   })
+    // NLOHMANN_JSON_SERIALIZE_ENUM(Delivery::Status, {
+    //                                                    {Delivery::Status::Pending, "Pending"},
+    //                                                    {Delivery::Status::InTransit, "InTransit"},
+    //                                                    {Delivery::Status::Delivered, "Delivered"},
+    //                                                    {Delivery::Status::Cancelled, "Cancelled"},
+    //                                                })
 
 }
 
@@ -125,23 +125,51 @@ namespace nlohmann
         }
     };
 
-    template <>
-    struct adl_serializer<App::Address>
+    template <typename T>
+    struct adl_serializer<std::optional<T>>
     {
-        static void to_json(json &j, const App::Address &a)
+        static void to_json(json &j, const std::optional<T> &opt)
         {
-            j = {
-                {"Id", a.Id}, {"addressLine", a.addressLine}, {"zipCode", a.zipCode}, {"city", a.city}, {"state", a.state}, {"country", a.country}};
+            if (opt)
+            {
+                j = *opt;
+            }
+            else
+            {
+                j = nullptr;
+            }
         }
 
-        static App::Address from_json(const json &j)
+        static void from_json(const json &j, std::optional<T> &opt)
         {
-            return App::Address(
-                j.at("Id").get<std::string>(), j.at("addressLine").get<std::string>(),
-                j.at("zipCode").get<std::string>(), j.at("city").get<std::string>(),
-                j.at("state").get<std::string>(), j.at("country").get<std::string>());
+            if (j.is_null())
+            {
+                opt = std::nullopt;
+            }
+            else
+            {
+                opt = j.get<T>();
+            }
         }
     };
+
+    // template <>
+    // struct adl_serializer<App::Address>
+    // {
+    //     static void to_json(json &j, const App::Address &a)
+    //     {
+    //         j = {
+    //             {"Id", a.Id}, {"addressLine", a.addressLine}, {"zipCode", a.zipCode}, {"city", a.city}, {"state", a.state}, {"country", a.country}};
+    //     }
+
+    //     static App::Address from_json(const json &j)
+    //     {
+    //         return App::Address(
+    //             j.at("Id").get<std::string>(), j.at("addressLine").get<std::string>(),
+    //             j.at("zipCode").get<std::string>(), j.at("city").get<std::string>(),
+    //             j.at("state").get<std::string>(), j.at("country").get<std::string>());
+    //     }
+    // };
 
     template <>
     struct adl_serializer<App::Booking>
@@ -150,11 +178,13 @@ namespace nlohmann
         {
             j = {
                 {"Id", b.Id},
-                {"eventID", b.eventID},
-                {"customerID", b.customerID},
+                {"eventID", b.eventId},
+                {"stallId", b.stallId},
+                {"vendorId", b.vendorId},
                 {"bookingTime", b.bookingTime},
                 {"pendingTime", b.pendingTime},
                 {"bookingFee", b.bookingFee},
+                {"rentalFee", b.rentalFee},
                 {"status", b.status}};
         }
 
@@ -162,10 +192,12 @@ namespace nlohmann
         {
             return App::Booking(j.at("Id").get<std::string>(),
                                 j.at("eventID").get<std::string>(),
-                                j.at("customerID").get<std::string>(),
+                                j.at("stallId").get<std::string>(),
+                                j.at("vendorId").get<std::string>(),
                                 j.at("bookingTime").get<std::chrono::system_clock::time_point>(),
-                                j.at("pendingTime").get<std::chrono::system_clock::time_point>(),
+                                j.at("pendingTime").get<std::optional<std::chrono::system_clock::time_point>>(),
                                 j.at("bookingFee").get<double>(),
+                                j.at("rentalFee").get<double>(),
                                 j.at("status").get<App::Booking::Status>());
         }
     };
@@ -178,19 +210,14 @@ namespace nlohmann
             j = {
                 {"Id", s.Id},
                 {"stallName", s.stallName},
-                {"rentalFee", s.rentalFee},
-                {"status", s.status},
-                {"vendorId", s.vendorId},
-            };
+                {"status", s.status}};
         }
 
         static App::Stall from_json(const json &j)
         {
             return App::Stall(j.at("Id").get<std::string>(),
                               j.at("stallName").get<std::string>(),
-                              j.at("rentalFee").get<double>(),
-                              j.at("status").get<App::Stall::Status>(),
-                              j.at("vendorId").get<std::string>());
+                              j.at("status").get<App::Stall::Status>());
         }
     };
 
@@ -216,29 +243,29 @@ namespace nlohmann
         }
     };
 
-    template <>
-    struct adl_serializer<App::Item::Transaction>
-    {
-        static void to_json(json &j, const App::Item::Transaction &t)
-        {
-            j = {
-                {"Id", t.Id},
-                {"orderID", t.orderID},
-                {"updateDateTime", t.updateDateTime},
-                {"quantity", t.quantity},
-                {"status", t.status},
-            };
-        }
+    // template <>
+    // struct adl_serializer<App::Item::Transaction>
+    // {
+    //     static void to_json(json &j, const App::Item::Transaction &t)
+    //     {
+    //         j = {
+    //             {"Id", t.Id},
+    //             {"orderID", t.orderID},
+    //             {"updateDateTime", t.updateDateTime},
+    //             {"quantity", t.quantity},
+    //             {"status", t.status},
+    //         };
+    //     }
 
-        static App::Item::Transaction from_json(const json &j)
-        {
-            return App::Item::Transaction(j.at("Id").get<std::string>(),
-                                          j.at("orderID").get<std::string>(),
-                                          j.at("updateDateTime").get<std::chrono::system_clock::time_point>(),
-                                          j.at("quantity").get<int>(),
-                                          j.at("status").get<App::Item::Transaction::Status>());
-        }
-    };
+    //     static App::Item::Transaction from_json(const json &j)
+    //     {
+    //         return App::Item::Transaction(j.at("Id").get<std::string>(),
+    //                                       j.at("orderID").get<std::string>(),
+    //                                       j.at("updateDateTime").get<std::chrono::system_clock::time_point>(),
+    //                                       j.at("quantity").get<int>(),
+    //                                       j.at("status").get<App::Item::Transaction::Status>());
+    //     }
+    // };
 
     template <>
     struct adl_serializer<App::Item::Specification>
@@ -272,11 +299,10 @@ namespace nlohmann
                 {"name", i.name},
                 {"description", i.description},
                 {"price", i.price},
-                {"stockQuantity", i.stockQuantity},
-                {"category", i.category},
-                {"vendorID", i.vendorID},
+                {"categoryId", i.categoryId},
+                {"vendorId", i.vendorId},
                 {"status", i.status},
-                {"specifications", i.specifications},
+                {"specificationIds", i.specificationIds},
             };
         }
 
@@ -286,11 +312,10 @@ namespace nlohmann
                              j.at("name").get<std::string>(),
                              j.at("description").get<std::string>(),
                              j.at("price").get<double>(),
-                             j.at("stockQuantity").get<int>(),
-                             j.at("category").get<App::Category>(),
-                             j.at("vendorID").get<std::string>(),
+                             j.at("categoryId").get<std::string>(),
+                             j.at("vendorId").get<std::string>(),
                              j.at("status").get<App::Item::Status>(),
-                             j.at("specifications").get<std::vector<std::string>>());
+                             j.at("specificationIds").get<std::vector<std::string>>());
         }
     };
 
@@ -331,6 +356,8 @@ namespace nlohmann
                 {"endDateTime", mc.endDateTime},
                 {"isPercentageBased", mc.isPercentageBased},
                 {"discountValue", mc.discountValue},
+                {"maxDiscountValue", mc.maxDiscountValue},
+                {"minOrderAmount", mc.minOrderAmount},
                 {"status", mc.status}};
         }
 
@@ -344,85 +371,87 @@ namespace nlohmann
                 j.at("endDateTime").get<std::chrono::system_clock::time_point>(),
                 j.at("isPercentageBased").get<bool>(),
                 j.at("discountValue").get<double>(),
+                j.at("maxDiscountValue").get<double>(),
+                j.at("minOrderAmount").get<double>(),
                 j.at("status").get<App::MarketingCampaign::Status>());
         }
     };
 
-    template <>
-    struct adl_serializer<App::OrderList>
-    {
-        static void to_json(json &j, const App::OrderList &ol)
-        {
-            j = {
-                {"Id", ol.Id},
-                {"customerID", ol.customerID},
-                {"orderIDs", ol.orderIDs},
-                {"orderDateTime", ol.orderDateTime},
-                {"totalAmount", ol.totalAmount},
-                {"status", ol.status}};
-        }
+    // template <>
+    // struct adl_serializer<App::OrderList>
+    // {
+    //     static void to_json(json &j, const App::OrderList &ol)
+    //     {
+    //         j = {
+    //             {"Id", ol.Id},
+    //             {"customerID", ol.customerID},
+    //             {"orderIDs", ol.orderIDs},
+    //             {"orderDateTime", ol.orderDateTime},
+    //             {"totalAmount", ol.totalAmount},
+    //             {"status", ol.status}};
+    //     }
 
-        static App::OrderList from_json(const json &j)
-        {
-            return App::OrderList(
-                j.at("Id").get<std::string>(),
-                j.at("customerID").get<std::string>(),
-                j.at("orderIDs").get<std::vector<std::string>>(),
-                j.at("orderDateTime").get<std::chrono::system_clock::time_point>(),
-                j.at("totalAmount").get<double>(),
-                j.at("status").get<App::OrderList::Status>());
-        }
-    };
+    //     static App::OrderList from_json(const json &j)
+    //     {
+    //         return App::OrderList(
+    //             j.at("Id").get<std::string>(),
+    //             j.at("customerID").get<std::string>(),
+    //             j.at("orderIDs").get<std::vector<std::string>>(),
+    //             j.at("orderDateTime").get<std::chrono::system_clock::time_point>(),
+    //             j.at("totalAmount").get<double>(),
+    //             j.at("status").get<App::OrderList::Status>());
+    //     }
+    // };
 
-    template <>
-    struct adl_serializer<App::Order>
-    {
-        static void to_json(json &j, const App::Order &o)
-        {
-            j = {
-                {"Id", o.Id},
-                {"quantity", o.quantity},
-                {"itemID", o.itemID},
-                {"status", o.status}};
-        }
+    // template <>
+    // struct adl_serializer<App::Order>
+    // {
+    //     static void to_json(json &j, const App::Order &o)
+    //     {
+    //         j = {
+    //             {"Id", o.Id},
+    //             {"quantity", o.quantity},
+    //             {"itemID", o.itemID},
+    //             {"status", o.status}};
+    //     }
 
-        static App::Order from_json(const json &j)
-        {
-            return App::Order(
-                j.at("Id").get<std::string>(),
-                j.at("quantity").get<int>(),
-                j.at("itemID").get<std::string>(),
-                j.at("status").get<App::Order::Status>());
-        }
-    };
+    //     static App::Order from_json(const json &j)
+    //     {
+    //         return App::Order(
+    //             j.at("Id").get<std::string>(),
+    //             j.at("quantity").get<int>(),
+    //             j.at("itemID").get<std::string>(),
+    //             j.at("status").get<App::Order::Status>());
+    //     }
+    // };
 
-    template <>
-    struct adl_serializer<App::Delivery>
-    {
-        static void to_json(json &j, const App::Delivery &d)
-        {
-            j = {
-                {"Id", d.Id},
-                {"address", d.address},
-                {"status", d.status},
-                {"scheduledDateTime", d.scheduledDateTime},
-                {"actualDateTime", d.actualDateTime},
-                {"deliveryFee", d.deliveryFee},
-                {"orderIDs", d.orderIDs}};
-        }
+    // template <>
+    // struct adl_serializer<App::Delivery>
+    // {
+    //     static void to_json(json &j, const App::Delivery &d)
+    //     {
+    //         j = {
+    //             {"Id", d.Id},
+    //             {"address", d.address},
+    //             {"status", d.status},
+    //             {"scheduledDateTime", d.scheduledDateTime},
+    //             {"actualDateTime", d.actualDateTime},
+    //             {"deliveryFee", d.deliveryFee},
+    //             {"orderIDs", d.orderIDs}};
+    //     }
 
-        static App::Delivery from_json(const json &j)
-        {
-            return App::Delivery(
-                j.at("Id").get<std::string>(),
-                j.at("address").get<App::Address>(),
-                j.at("status").get<App::Delivery::Status>(),
-                j.at("scheduledDateTime").get<std::chrono::system_clock::time_point>(),
-                j.at("actualDateTime").get<std::chrono::system_clock::time_point>(),
-                j.at("deliveryFee").get<double>(),
-                j.at("orderIDs").get<std::vector<std::string>>());
-        }
-    };
+    //     static App::Delivery from_json(const json &j)
+    //     {
+    //         return App::Delivery(
+    //             j.at("Id").get<std::string>(),
+    //             j.at("address").get<App::Address>(),
+    //             j.at("status").get<App::Delivery::Status>(),
+    //             j.at("scheduledDateTime").get<std::chrono::system_clock::time_point>(),
+    //             j.at("actualDateTime").get<std::chrono::system_clock::time_point>(),
+    //             j.at("deliveryFee").get<double>(),
+    //             j.at("orderIDs").get<std::vector<std::string>>());
+    //     }
+    // };
 
     template <>
     struct adl_serializer<App::Identity>
@@ -444,23 +473,23 @@ namespace nlohmann
         }
     };
 
-    template <>
-    struct adl_serializer<App::Customer>
-    {
-        static void to_json(json &j, const App::Customer &c)
-        {
-            j = static_cast<const App::Identity &>(c);
-            j["addresses"] = c.addresses;
-        }
+    // template <>
+    // struct adl_serializer<App::Customer>
+    // {
+    //     static void to_json(json &j, const App::Customer &c)
+    //     {
+    //         j = static_cast<const App::Identity &>(c);
+    //         j["addresses"] = c.addresses;
+    //     }
 
-        static App::Customer from_json(const json &j)
-        {
-            auto base = j.get<App::Identity>();
-            auto addresses = j.at("addresses").get<std::vector<App::Address>>();
-            return App::Customer(
-                base.Id, base.pwd, base.name, base.email, base.phoneNumber, addresses);
-        }
-    };
+    //     static App::Customer from_json(const json &j)
+    //     {
+    //         auto base = j.get<App::Identity>();
+    //         auto addresses = j.at("addresses").get<std::vector<App::Address>>();
+    //         return App::Customer(
+    //             base.Id, base.pwd, base.name, base.email, base.phoneNumber, addresses);
+    //     }
+    // };
 
     template <>
     struct adl_serializer<App::Vendor>
@@ -496,14 +525,26 @@ namespace nlohmann
         static void to_json(json &j, const App::Event &e)
         {
             j = {
-                {"Id", e.Id}, {"name", e.name}, {"description", e.description}, {"organizerName", e.organizerName}, {"staffId", e.staffId}, {"maxStall", e.maxStall}, {"status", e.status}, {"startDateTime", e.startDateTime}, {"endDateTime", e.endDateTime}};
+                {"Id", e.Id},
+                {"name", e.name},
+                {"description", e.description},
+                {"organizerIds", e.organizerIds},
+                {"staffIds", e.staffIds},
+                {"maxStall", e.maxStall},
+                {"status", e.status},
+                {"startDateTime", e.startDateTime},
+                {"endDateTime", e.endDateTime}};
         }
+
         static App::Event from_json(const json &j)
         {
             return App::Event(
-                j.at("Id").get<std::string>(), j.at("name").get<std::string>(),
-                j.at("description").get<std::string>(), j.at("organizerName").get<std::vector<std::string>>(),
-                j.at("staffId").get<std::vector<std::string>>(), j.at("maxStall").get<int>(),
+                j.at("Id").get<std::string>(),
+                j.at("name").get<std::string>(),
+                j.at("description").get<std::string>(),
+                j.at("organizerIds").get<std::vector<std::string>>(),
+                j.at("staffIds").get<std::vector<std::string>>(),
+                j.at("maxStall").get<int>(),
                 j.at("status").get<App::Event::Status>(),
                 j.at("startDateTime").get<std::chrono::system_clock::time_point>(),
                 j.at("endDateTime").get<std::chrono::system_clock::time_point>());
@@ -523,12 +564,13 @@ namespace nlohmann
             {
                 json identity_obj;
 
-                if (auto *customer = dynamic_cast<App::Customer *>(identity_ptr.get()))
-                {
-                    identity_obj["type"] = "Customer";
-                    identity_obj["data"] = *customer;
-                }
-                else if (auto *vendor = dynamic_cast<App::Vendor *>(identity_ptr.get()))
+                // if (auto *customer = dynamic_cast<App::Customer *>(identity_ptr.get()))
+                // {
+                //     identity_obj["type"] = "Customer";
+                //     identity_obj["data"] = *customer;
+                // }
+                // else
+                if (auto *vendor = dynamic_cast<App::Vendor *>(identity_ptr.get()))
                 {
                     identity_obj["type"] = "Vendor";
                     identity_obj["data"] = *vendor;
@@ -553,11 +595,12 @@ namespace nlohmann
                 std::string type = identity_obj.at("type").get<std::string>();
                 const json &data = identity_obj.at("data");
 
-                if (type == "Customer")
-                {
-                    identities.push_back(std::make_unique<App::Customer>(data.get<App::Customer>()));
-                }
-                else if (type == "Vendor")
+                // if (type == "Customer")
+                // {
+                //     identities.push_back(std::make_unique<App::Customer>(data.get<App::Customer>()));
+                // }
+                // else
+                if (type == "Vendor")
                 {
                     identities.push_back(std::make_unique<App::Vendor>(data.get<App::Vendor>()));
                 }

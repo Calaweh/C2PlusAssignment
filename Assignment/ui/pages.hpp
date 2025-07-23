@@ -2,6 +2,7 @@
 #include <string>
 #include "page.hpp"
 #include "../universalFunction/helperFunctions.hpp"
+#include "../entityManager/master_manager.hpp"
 
 namespace App {
     class Customer;
@@ -16,14 +17,14 @@ public:
     explicit LoginPage(std::string emailOrId, std::string password);
     void display(ScreenController& screenController) override; 
     void accountPrompt(IOSubManager &iOSubManager);
-    void switchPage(ScreenController& screenController, IOSubManager &IOSubManager, bool &isBack);
-    void SignUpPage();
+    void switchPage(ScreenController& screenController, IOSubManager &iOSubManager, bool &isBack);
+    void SignUpPage(IOSubManager &iOSubManager, MasterManager &masterManager);
     void ForgotPasswordPage();
     
 private:
     std::string emailOrId;
     std::string password;
-    int accountType; //1 for Customer, 2 for Vendor, 3 for Staff
+    int accountType; //1 for Vendor, 2 for Staff
 };
 
 

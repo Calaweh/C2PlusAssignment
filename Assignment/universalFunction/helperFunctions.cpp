@@ -34,12 +34,33 @@ void IOSubManager::gotError(std::string errorMessage)
     this->errorMessage = errorMessage;
     setInvalid();
 }
-void IOSubManager::setValid() { 
+void IOSubManager::setValid()
+{
     this->errorMessage.clear();
     this->isValid = true;
 }
-
-
+void IOSubManager::printErrorMessage()
+{
+    std::cout << "\033[31m[!] ";
+    std::cout << this->errorMessage << std::endl;
+    std::cout << "\033[0m";
+    setValid();
+}
+bool IOSubManager::receiveNonEmptyInput()
+{
+    std::cin.ignore();
+    if (!getline(std::cin, this->input))
+    {
+        gotError(CANNOT_LEAVE_BLANK_ERROR);
+        return false;
+    }
+    return true;
+}
+void IOSubManager::displayErrorHolded()
+{
+    if (!getIsValid())
+        printErrorMessage();
+}
 
 std::string getPrimaryKey(const std::string &className)
 {
@@ -147,30 +168,35 @@ void stoiWithLimit(IOSubManager &iOSubManager, const int &MIN_NUM, const int &MA
     if (iOSubManager.getIsValid())
     {
         int value = iOSubManager.getSelection();
-        if (value < MIN_NUM || value > MAX_NUM) {
+        if (value < MIN_NUM || value > MAX_NUM)
+        {
             iOSubManager.gotError("Invalid Selection. Please try again.");
         }
     }
+
+    // if (IS_SET_ERROR)
+    //     iOSubManager.setValid(); // clear Error if it's not necessary
+
     return;
 }
 
 template <typename T>
-void stoa(IOSubManager &IOSubManager)
+void stoa(IOSubManager &iOSubManager)
 {
     size_t pos;
     try
     {
         if constexpr (std::is_same_v<T, int>)
         {
-            int value = std::stoi(IOSubManager.input, &pos);
-            if (pos != IOSubManager.input.length())
+            int value = std::stoi(iOSubManager.input, &pos);
+            if (pos != iOSubManager.input.length())
             {
-                IOSubManager.gotError("Invalid numeric conversion");
+                iOSubManager.gotError("Invalid numeric conversion");
                 return;
             }
             else
             {
-                IOSubManager.setSelection(value);
+                iOSubManager.setSelection(value);
                 return;
             }
         }
@@ -188,10 +214,10 @@ void stoa(IOSubManager &IOSubManager)
         //         return;
         //     }
         // }
-        IOSubManager.gotError("Unsupported type");
+        iOSubManager.gotError("Unsupported type");
     }
     catch (...)
     {
-        IOSubManager.gotError("Invalid numeric conversion");
+        iOSubManager.gotError("Invalid numeric conversion");
     }
 }
