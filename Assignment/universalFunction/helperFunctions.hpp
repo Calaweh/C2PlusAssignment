@@ -7,6 +7,7 @@ struct IOSubManager
 {
     std::string input;
     std::string errorMessage;
+    bool isLoop;
 
     void setInvalid();
     bool getIsValid();
@@ -14,7 +15,11 @@ struct IOSubManager
     int getSelection();
     void gotError(std::string errorMessage);
     void setValid();
-    IOSubManager() : isValid(true), selection(0) {}
+    void printErrorMessage();
+    bool receiveNonEmptyInput();
+    void displayErrorHolded();
+
+    IOSubManager() : isValid(true), selection(0), isLoop(true) {}
 
 private:
     bool isValid;
@@ -25,7 +30,7 @@ std::string getPrimaryKey(const std::string &className);
 std::vector<std::string> splitStringBySpace(const std::string& STR, int MAX_STRING_LENGTH_1_LINE);
 template <typename T>
 void stoa(IOSubManager &);
-void stoiWithLimit(IOSubManager &IOSubManager, const int &MIN_NUM, const int &MAX_NUM);
+void stoiWithLimit(IOSubManager &iOSubManager, const int &MIN_NUM, const int &MAX_NUM);
 
 // template void stoa<int>(IOSubManager &);
 // template void stoa<double>(IOSubManager &);

@@ -4,6 +4,7 @@
 #include "..\universalFunction\globalFile.hpp"
 #include <vector>
 #include <unordered_set>
+#include <deque>
 
 template <typename T>
 struct EntitiesManager
@@ -25,8 +26,8 @@ public:
 
     inline void createOrUpdateEntity(T &entity)
     {
-        for (const auto &existingEntity : this->entities)
-            if (auto lockedEntity = existingEntity.lock())
+        for (auto &existingEntity : this->entities)
+            if (auto lockedEntity = existingEntity)
                 if (lockedEntity->Id == entity.Id)
                 {
                     updateEntity(entity);
@@ -60,13 +61,15 @@ public:
     inline void updateEntity(T &entity)
     {
         db.updateEntity(collectionName, entity);
-        auto it = std::find_if(this->entities.begin(), this->entities.end(),
-                               [&entity](const std::weak_ptr<T> &e)
-                               {
-                                   return e.lock()->Id == entity.Id;
-                               });
-        if (it != this->entities.end())
-            *it = std::make_shared<T>(entity);
+        
+        auto it = std::find_if(entities.begin(), entities.end(),
+            [&entity](const std::shared_ptr<T>& ptr) {
+                return ptr && ptr->Id == entity.Id;
+            });
+        
+        if (it != entities.end()) {
+            *(*it) = entity; 
+        }
     }
 
     inline void updateEntity(std::vector<T> entities)
@@ -80,4 +83,7 @@ public:
         db.createEntity(collectionName, entity);
         this->entities.insert(std::make_shared<T>(entity));
     }
+
+    // virtual T promptEntityDataFields(IOSubManager &iOSubManager) = 0; //invoke "stoEntity(...)" function to get Entity
+    
 };

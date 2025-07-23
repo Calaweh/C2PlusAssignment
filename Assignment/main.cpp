@@ -6,11 +6,10 @@
 
 int main() {
 
-    // std::cout << "Ke" << std::endl;
+    std::cout << "Test --Run now!" << std::endl;//////////////////////
     MasterManager masterManager;
     IOSubManager iOSubManager;
     ScreenController screenController(masterManager, iOSubManager);
-
     AppContext(masterManager, iOSubManager, screenController).run();
 
     return 0;

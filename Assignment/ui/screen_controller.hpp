@@ -16,7 +16,7 @@ public:
     ScreenController(MasterManager &masterManager, IOSubManager &iOSubManager);
 
     void navigateToLogin();
-    void navigateToCustomerPage(App::Customer &customer);
+    // void navigateToCustomerPage(App::Customer &customer);
     void navigateToVendorPage(App::Vendor &vendor);
     void navigateToStaffPage(App::Staff &staff);
 
@@ -24,7 +24,7 @@ public:
 
     void clearScreen();
 
-    const MasterManager& getMasterManager() const { return masterManager; }
+    MasterManager& getMasterManager() const { return masterManager; }
     IOSubManager& getIOSubManager() const { return iOSubManager; }
 };
 

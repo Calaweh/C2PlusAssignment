@@ -31,20 +31,21 @@ private:
             {EVENTS, json::array()},
             {BOOKINGS, json::array()},
             {STALLS, json::array()},
-            {CUSTOMERS, json::array()},
+            // {CUSTOMERS, json::array()},
             {VENDORS, json::array()},
             {STAFFS, json::array()},
             {ITEMS, json::array()},
-            {ORDERS, json::array()},
-            {DELIVERIES, json::array()},
-            {ADDRESSES, json::array()},
+            // {ORDERS, json::array()},
+            // {DELIVERIES, json::array()},
+            // {ADDRESSES, json::array()},
             {IDENTITIES, json::array()},
             {CATEGORIES, json::array()},
             {SPECIFICATIONS, json::array()},
             {MONITORING_RECORDS, json::array()},
             {REPORTS, json::array()},
             {MARKETING_CAMPAIGNS, json::array()},
-            {ORDERLISTS, json::array()}};
+            // {ORDERLISTS, json::array()}
+            };
     }
 
     void saveDatabase(const json &DATA)
@@ -66,8 +67,7 @@ public:
     inline void createEntity(const std::string &collectionName, const T &ENTITY)
     {
         json db = loadDatabase();
-        json entityJson;
-        to_json(ENTITY, entityJson);
+        json entityJson = ENTITY; // Let nlohmann/json handle the conversion
         db[collectionName].push_back(entityJson);
         saveDatabase(db);
     }
@@ -94,8 +94,7 @@ public:
     inline void updateEntity(const std::string &collectionName, const T &ENTITY)
     {
         json db = loadDatabase();
-        json entityJson;
-        to_json(ENTITY, entityJson);
+        json entityJson = ENTITY; 
 
         for (auto &item : db[collectionName])
         {

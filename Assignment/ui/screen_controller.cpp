@@ -10,12 +10,6 @@ void ScreenController::navigateToLogin()
     currentPage->display(*this);
 }
 
-void ScreenController::navigateToCustomerPage(App::Customer &customer)
-{
-    currentPage = std::make_unique<CustomerPage>(customer);
-    currentPage->display(*this);
-}
-
 void ScreenController::navigateToVendorPage(App::Vendor &vendor)
 {
     currentPage = std::make_unique<VendorPage>(vendor);
